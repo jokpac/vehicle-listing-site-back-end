@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import lt.ca.javau11.entities.City;
 import lt.ca.javau11.entities.Country;
+import lt.ca.javau11.models.CityDTO;
 import lt.ca.javau11.repositories.CountryRepository;
 
 @Service
@@ -35,15 +35,15 @@ public class CountryService {
     }
 
     // Get cities by country ID
-    public Optional<List<String>> getCitiesByCountry(Long countryId) {
+    public Optional<List<CityDTO>> getCitiesByCountry(Long countryId) {
         Optional<Country> box = repo.findById(countryId);
         if (box.isPresent()) {
-            List<String> cityNames = box.get()
+            List<CityDTO> cityDTOs = box.get()
                 .getCities()
                 .stream()
-                .map(City::getName)
+                .map(city -> new CityDTO(city.getId(), city.getName()))
                 .collect(Collectors.toList());
-            return Optional.of(cityNames);
+            return Optional.of(cityDTOs);
         }
         return Optional.empty();
     }

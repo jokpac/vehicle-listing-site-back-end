@@ -1,11 +1,12 @@
 package lt.ca.javau11.entities;
 
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Lob;
 
 @Entity
 public class Image {
@@ -14,22 +15,19 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String fileName;
-    private String fileType;
-    private String url;
-
-    @ManyToOne
-    @JoinColumn(name = "listing_id", nullable = false)
-    private Listing listing;
+	@Column(name = "file_name", nullable = false)
+	private String fileName;
+	
+	@Lob
+	@Column(name = "data", columnDefinition = "LONGBLOB")
+	private byte[] data;
 
     public Image() {}
 
-	public Image(Long id, String fileName, String fileType, String url, Listing listing) {
+	public Image(Long id, String fileName, byte[] data, Listing listing) {
 		this.id = id;
 		this.fileName = fileName;
-		this.fileType = fileType;
-		this.url = url;
-		this.listing = listing;
+		this.data = data;
 	}
 
 	public Long getId() {
@@ -48,30 +46,12 @@ public class Image {
 		this.fileName = fileName;
 	}
 
-	public String getFileType() {
-		return fileType;
+	public byte[] getData() {
+		return data;
 	}
 
-	public void setFileType(String fileType) {
-		this.fileType = fileType;
+	public void setData(byte[] data) {
+		this.data = data;
 	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public Listing getListing() {
-		return listing;
-	}
-
-	public void setListing(Listing listing) {
-		this.listing = listing;
-	}
-
-
 
 }

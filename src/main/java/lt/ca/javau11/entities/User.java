@@ -1,11 +1,5 @@
 package lt.ca.javau11.entities;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,7 +7,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -41,20 +34,15 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonBackReference
-    private List<Listing> listings = new ArrayList<>();
     
     public User() {}
 
-	public User(Long id, String username, String email, String password, Role role, List<Listing> listings) {
+	public User(Long id, String username, String email, String password, Role role) {
 		this.id = id;
 		this.username = username;
 		this.email = email;
 		this.password = password;
 		this.role = role;
-		this.listings = listings;
 	}
 
 	public Long getId() {
@@ -96,14 +84,5 @@ public class User {
 	public void setRole(Role role) {
 		this.role = role;
 	}
-
-	public List<Listing> getListings() {
-		return listings;
-	}
-
-	public void setListings(List<Listing> listings) {
-		this.listings = listings;
-	}
-
 
 }

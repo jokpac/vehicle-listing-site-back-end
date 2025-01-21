@@ -1,5 +1,9 @@
 package lt.ca.javau11.models;
 
+
+import java.util.ArrayList;
+import java.util.List;
+
 import lt.ca.javau11.enums.DrivenWheels;
 import lt.ca.javau11.enums.FuelType;
 import lt.ca.javau11.enums.ListingType;
@@ -24,12 +28,13 @@ public class ListingDTO {
     private Transmission transmission;
     private DrivenWheels drivenWheels;
     private ListingType listingType;
+    private List<String> imageURLs = new ArrayList<>();
     
     public ListingDTO() {}
 
 	public ListingDTO(Long countryId, Long cityId, Long makeId, Long modelId, Long userId, String title, Double price,
 			int year, int month, int mileage, String description, double engineSize, int enginePower, FuelType fuelType,
-			Transmission transmission, DrivenWheels drivenWheels, ListingType listingType) {
+			Transmission transmission, DrivenWheels drivenWheels, ListingType listingType, List<String> imageURLs) {
 		this.countryId = countryId;
 		this.cityId = cityId;
 		this.makeId = makeId;
@@ -47,6 +52,7 @@ public class ListingDTO {
 		this.transmission = transmission;
 		this.drivenWheels = drivenWheels;
 		this.listingType = listingType;
+		this.imageURLs = imageURLs;
 	}
 
 	public Long getCountryId() {
@@ -184,6 +190,14 @@ public class ListingDTO {
 	public void setListingType(ListingType listingType) {
 		this.listingType = listingType;
 	}
-    
+
+	public List<String> getImageURLs() {
+		return imageURLs;
+	}
+
+	public void setImageURLs(List<String> imageURLs) {
+		this.imageURLs = imageURLs;
+	}
+
     
 }

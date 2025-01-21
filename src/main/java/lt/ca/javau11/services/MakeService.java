@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import lt.ca.javau11.entities.Make;
-import lt.ca.javau11.entities.Model;
+import lt.ca.javau11.models.ModelDTO;
 import lt.ca.javau11.repositories.MakeRepository;
 
 @Service
@@ -51,16 +51,16 @@ public class MakeService {
         return true;
     }
 
-    public Optional<List<String>> getModelsByMake(Long makeId) {
+    public Optional<List<ModelDTO>> getModelsByMake(Long makeId) {
         Optional<Make> box = repo.findById(makeId);
         if (box.isPresent()) {
-            List<String> modelNames = box.get()
-                .getModels()
+            List<ModelDTO> modelDTOs = box.get()
+                .getModels()  // Assuming Make has a collection of Models
                 .stream()
-                .map(Model::getName)
+                .map(model -> new ModelDTO(model.getId(), model.getName())) // Mapping Model to ModelDTO
                 .collect(Collectors.toList());
-            return Optional.of(modelNames);
+            return Optional.of(modelDTOs);
         }
-        return Optional.empty();
+        return Optional.empty();  // Return empty if Make is not found
     }
 }

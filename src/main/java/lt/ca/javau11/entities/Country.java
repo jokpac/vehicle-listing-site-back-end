@@ -3,7 +3,6 @@ package lt.ca.javau11.entities;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -27,10 +26,6 @@ public class Country {
     @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<City> cities = new ArrayList<>();
-    
-    @OneToMany(mappedBy = "country", cascade = CascadeType.ALL)
-    @JsonBackReference
-    private List<Listing> listings = new ArrayList<>();
 
 	public Country() {}
 

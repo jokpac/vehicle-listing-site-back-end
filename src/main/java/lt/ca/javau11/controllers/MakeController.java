@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lt.ca.javau11.entities.Make;
+import lt.ca.javau11.models.ModelDTO;
 import lt.ca.javau11.services.MakeService;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/makes")
 public class MakeController {
@@ -43,9 +46,10 @@ public class MakeController {
     }
     
     @GetMapping("/{id}/models")
-    public ResponseEntity<List<String>> getModelsByMake(@PathVariable Long id) {
-        Optional<List<String>> models = makeService.getModelsByMake(id);
-        return ResponseEntity.of(models);
+    public ResponseEntity<List<ModelDTO>> getModelsByMake(@PathVariable Long id) {
+        Optional<List<ModelDTO>> models = makeService.getModelsByMake(id);
+        return models.map(ResponseEntity::ok)
+                     .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")

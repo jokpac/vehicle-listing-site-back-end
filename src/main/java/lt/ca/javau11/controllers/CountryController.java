@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lt.ca.javau11.entities.Country;
+import lt.ca.javau11.models.CityDTO;
 import lt.ca.javau11.services.CountryService;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/countries")
 public class CountryController {
@@ -26,40 +29,35 @@ public class CountryController {
         this.countryService = countryService;
     }
 
-    // Get all countries
     @GetMapping
     public List<Country> getAll() {
         return countryService.getAll();
     }
 
-    // Add a new country
     @PostMapping
     public Country addCountry(@RequestBody Country country) {
         return countryService.addCountry(country);
     }
 
-    // Get a country by ID
     @GetMapping("/{id}")
     public ResponseEntity<Country> getById(@PathVariable Long id) {
         Optional<Country> box = countryService.getById(id);
         return ResponseEntity.of(box);
     }
     
-    // Get cities by country ID
     @GetMapping("/{id}/cities")
-    public ResponseEntity<List<String>> getCitiesByCountry(@PathVariable Long id) {
-        Optional<List<String>> cities = countryService.getCitiesByCountry(id);
-        return ResponseEntity.of(cities);
+    public ResponseEntity<List<CityDTO>> getCitiesByCountry(@PathVariable Long id) {
+        Optional<List<CityDTO>> cities = countryService.getCitiesByCountry(id);
+        return cities.map(ResponseEntity::ok)
+                     .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Update a country
     @PutMapping("/{id}")
     public ResponseEntity<Country> updateCountry(@PathVariable Long id, @RequestBody Country country) {
         Optional<Country> box = countryService.updateCountry(id, country);
         return ResponseEntity.of(box);
     }
 
-    // Delete a country
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCountry(@PathVariable Long id) {
         boolean isDeleted = countryService.deleteCountry(id);

@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,7 +15,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lt.ca.javau11.enums.DrivenWheels;
@@ -30,9 +29,6 @@ public class Listing {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL)
-    private List<Image> images = new ArrayList<>();
 
     private String title;
 
@@ -71,29 +67,29 @@ public class Listing {
 
     @ManyToOne
     @JoinColumn(name = "country_id", nullable = false)
-    @JsonManagedReference
     private Country country;
 
     @ManyToOne
     @JoinColumn(name = "city_id", nullable = false)
-    @JsonManagedReference
     private City city;
 
     @ManyToOne
     @JoinColumn(name = "make_id", nullable = false)
-    @JsonManagedReference
     private Make make;
 
     @ManyToOne
     @JoinColumn(name = "model_id", nullable = false)
-    @JsonManagedReference
     private Model model;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonManagedReference
     private User user;
 
+    @ElementCollection
+    @CollectionTable(name = "listing_image_urls", joinColumns = @JoinColumn(name = "listing_id"))
+    @Column(name = "image_url")
+    private List<String> imageURLs = new ArrayList<>();
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -106,12 +102,12 @@ public class Listing {
     
     public Listing() {}
 
-	public Listing(Long id, List<Image> images, String title, Double price, int year, int month, int mileage,
-			String description, double engineSize, int enginePower, FuelType fuelType, Transmission transmission,
-			DrivenWheels drivenWheels, ListingType listingType, ListingStatus listingStatus, LocalDateTime createdAt,
-			LocalDateTime updatedAt, Country country, City city, Make make, Model model, User user) {
+	public Listing(Long id, String title, Double price, int year, int month, int mileage, String description,
+			double engineSize, int enginePower, FuelType fuelType, Transmission transmission, DrivenWheels drivenWheels,
+			ListingType listingType, ListingStatus listingStatus, LocalDateTime createdAt, LocalDateTime updatedAt,
+			Country country, City city, Make make, Model model, User user, List<String> imageURLs) {
+		super();
 		this.id = id;
-		this.images = images;
 		this.title = title;
 		this.price = price;
 		this.year = year;
@@ -132,6 +128,15 @@ public class Listing {
 		this.make = make;
 		this.model = model;
 		this.user = user;
+		this.imageURLs = imageURLs;
+	}
+
+	public List<String> getImageURLs() {
+		return imageURLs;
+	}
+
+	public void setImageURLs(List<String> imageURLs) {
+		this.imageURLs = imageURLs;
 	}
 
 	public Long getId() {
@@ -142,13 +147,6 @@ public class Listing {
 		this.id = id;
 	}
 
-	public List<Image> getImages() {
-		return images;
-	}
-
-	public void setImages(List<Image> images) {
-		this.images = images;
-	}
 
 	public String getTitle() {
 		return title;

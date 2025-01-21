@@ -12,7 +12,6 @@ import lt.ca.javau11.entities.Listing;
 import lt.ca.javau11.entities.Make;
 import lt.ca.javau11.entities.Model;
 import lt.ca.javau11.entities.User;
-import lt.ca.javau11.enums.ListingStatus;
 import lt.ca.javau11.exceptions.CityNotFoundException;
 import lt.ca.javau11.exceptions.CountryNotFoundException;
 import lt.ca.javau11.exceptions.MakeNotFoundException;
@@ -34,7 +33,6 @@ public class ListingService {
     private final MakeRepository makeRepository;
     private final ModelRepository modelRepository;
     private final UserRepository userRepository;
-
     
     public ListingService(
     						ListingRepository listingRepository, 
@@ -73,7 +71,7 @@ public class ListingService {
                 .orElseThrow(() -> new ModelNotFoundException("Model not found"));
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-
+        
         Listing listing = new Listing();
         listing.setCountry(country);
         listing.setCity(city);
@@ -92,7 +90,7 @@ public class ListingService {
         listing.setTransmission(request.getTransmission());
         listing.setDrivenWheels(request.getDrivenWheels());
         listing.setListingType(request.getListingType());
-        listing.setListingStatus(ListingStatus.ACTIVE);
+        listing.setImageURLs(request.getImageURLs());
 
         return listingRepository.save(listing);
     }
@@ -121,6 +119,7 @@ public class ListingService {
             existingListing.setTransmission(updatedListing.getTransmission());
             existingListing.setDrivenWheels(updatedListing.getDrivenWheels());
             existingListing.setListingType(updatedListing.getListingType());
+            existingListing.setImageURLs(updatedListing.getImageURLs());
             existingListing.setListingStatus(updatedListing.getListingStatus());
             existingListing.setCountry(country);
             existingListing.setCity(city);
