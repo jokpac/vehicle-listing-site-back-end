@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "jokpac.app.jwtSecret",
+    "type": "java.lang.String",
+    "description": "A description for 'jokpac.app.jwtSecret'"
+  },
+  {
+    "name": "jokpac.app.jwtExpirationMs",
+    "type": "java.lang.String",
+    "description": "A description for 'jokpac.app.jwtExpirationMs'"
+  }
+]}

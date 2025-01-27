@@ -106,7 +106,6 @@ public class Listing {
 			double engineSize, int enginePower, FuelType fuelType, Transmission transmission, DrivenWheels drivenWheels,
 			ListingType listingType, ListingStatus listingStatus, LocalDateTime createdAt, LocalDateTime updatedAt,
 			Country country, City city, Make make, Model model, User user, List<String> imageURLs) {
-		super();
 		this.id = id;
 		this.title = title;
 		this.price = price;

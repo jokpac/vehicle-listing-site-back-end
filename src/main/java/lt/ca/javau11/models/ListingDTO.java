@@ -6,6 +6,7 @@ import java.util.List;
 
 import lt.ca.javau11.enums.DrivenWheels;
 import lt.ca.javau11.enums.FuelType;
+import lt.ca.javau11.enums.ListingStatus;
 import lt.ca.javau11.enums.ListingType;
 import lt.ca.javau11.enums.Transmission;
 
@@ -28,13 +29,15 @@ public class ListingDTO {
     private Transmission transmission;
     private DrivenWheels drivenWheels;
     private ListingType listingType;
+    private ListingStatus listingStatus;
     private List<String> imageURLs = new ArrayList<>();
     
     public ListingDTO() {}
 
 	public ListingDTO(Long countryId, Long cityId, Long makeId, Long modelId, Long userId, String title, Double price,
 			int year, int month, int mileage, String description, double engineSize, int enginePower, FuelType fuelType,
-			Transmission transmission, DrivenWheels drivenWheels, ListingType listingType, List<String> imageURLs) {
+			Transmission transmission, DrivenWheels drivenWheels, ListingType listingType, ListingStatus listingStatus,
+			List<String> imageURLs) {
 		this.countryId = countryId;
 		this.cityId = cityId;
 		this.makeId = makeId;
@@ -52,7 +55,16 @@ public class ListingDTO {
 		this.transmission = transmission;
 		this.drivenWheels = drivenWheels;
 		this.listingType = listingType;
+		this.listingStatus = listingStatus;
 		this.imageURLs = imageURLs;
+	}
+
+	public ListingStatus getListingStatus() {
+		return listingStatus;
+	}
+
+	public void setListingStatus(ListingStatus listingStatus) {
+		this.listingStatus = listingStatus;
 	}
 
 	public Long getCountryId() {

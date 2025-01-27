@@ -1,8 +1,7 @@
 package lt.ca.javau11.enums;
 
-public enum Role { 
+public enum ERole { 
     ADMIN,
     MODERATOR,
-    USER,
-    GUEST
+    USER
 }

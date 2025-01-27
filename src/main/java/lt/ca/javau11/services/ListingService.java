@@ -3,6 +3,7 @@ package lt.ca.javau11.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import lt.ca.javau11.models.ListingDTO;
@@ -61,6 +62,9 @@ public class ListingService {
     }
 
     public Listing createListing(ListingDTO request) {
+    	
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    	
         Country country = countryRepository.findById(request.getCountryId())
                 .orElseThrow(() -> new CountryNotFoundException("Country not found"));
         City city = cityRepository.findById(request.getCityId())
@@ -69,7 +73,7 @@ public class ListingService {
                 .orElseThrow(() -> new MakeNotFoundException("Make not found"));
         Model model = modelRepository.findById(request.getModelId())
                 .orElseThrow(() -> new ModelNotFoundException("Model not found"));
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         
         Listing listing = new Listing();
@@ -89,45 +93,53 @@ public class ListingService {
         listing.setFuelType(request.getFuelType());
         listing.setTransmission(request.getTransmission());
         listing.setDrivenWheels(request.getDrivenWheels());
+        listing.setListingStatus(request.getListingStatus());
         listing.setListingType(request.getListingType());
         listing.setImageURLs(request.getImageURLs());
 
         return listingRepository.save(listing);
     }
 
-    public Optional<Listing> updateListing(Long id, Listing updatedListing, Long countryId, Long cityId, Long makeId, Long modelId) {
-    	
-        return listingRepository.findById(id).map(existingListing -> {
-            Country country = countryRepository.findById(countryId)
-                    .orElseThrow(() -> new CountryNotFoundException("Country not found"));
-            City city = cityRepository.findById(cityId)
-                    .orElseThrow(() -> new CityNotFoundException("City not found"));
-            Make make = makeRepository.findById(makeId)
-                    .orElseThrow(() -> new MakeNotFoundException("Make not found"));
-            Model model = modelRepository.findById(modelId)
-                    .orElseThrow(() -> new ModelNotFoundException("Model not found"));
+    public Optional<Listing> updateListing(Long id, ListingDTO updatedListing) {
+        
+    	String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            existingListing.setTitle(updatedListing.getTitle());
-            existingListing.setPrice(updatedListing.getPrice());
-            existingListing.setYear(updatedListing.getYear());
-            existingListing.setMonth(updatedListing.getMonth());
-            existingListing.setMileage(updatedListing.getMileage());
-            existingListing.setDescription(updatedListing.getDescription());
-            existingListing.setEngineSize(updatedListing.getEngineSize());
-            existingListing.setEnginePower(updatedListing.getEnginePower());
-            existingListing.setFuelType(updatedListing.getFuelType());
-            existingListing.setTransmission(updatedListing.getTransmission());
-            existingListing.setDrivenWheels(updatedListing.getDrivenWheels());
-            existingListing.setListingType(updatedListing.getListingType());
-            existingListing.setImageURLs(updatedListing.getImageURLs());
-            existingListing.setListingStatus(updatedListing.getListingStatus());
-            existingListing.setCountry(country);
-            existingListing.setCity(city);
-            existingListing.setMake(make);
-            existingListing.setModel(model);
+        Optional<Listing> existingListingOpt = listingRepository.findById(id);
+        if (existingListingOpt.isEmpty()) {
+            return Optional.empty();
+        }
 
-            return listingRepository.save(existingListing);
-        });
+        Listing existingListing = existingListingOpt.get();
+
+        if (!existingListing.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("You are not authorized to update this listing");
+        }
+
+        existingListing.setTitle(updatedListing.getTitle());
+        existingListing.setPrice(updatedListing.getPrice());
+        existingListing.setYear(updatedListing.getYear());
+        existingListing.setMonth(updatedListing.getMonth());
+        existingListing.setMileage(updatedListing.getMileage());
+        existingListing.setDescription(updatedListing.getDescription());
+        existingListing.setEngineSize(updatedListing.getEngineSize());
+        existingListing.setEnginePower(updatedListing.getEnginePower());
+        existingListing.setFuelType(updatedListing.getFuelType());
+        existingListing.setTransmission(updatedListing.getTransmission());
+        existingListing.setDrivenWheels(updatedListing.getDrivenWheels());
+        existingListing.setListingType(updatedListing.getListingType());
+        existingListing.setImageURLs(updatedListing.getImageURLs());
+
+        existingListing.setCountry(countryRepository.findById(updatedListing.getCountryId())
+                .orElseThrow(() -> new CountryNotFoundException("Country not found")));
+        existingListing.setCity(cityRepository.findById(updatedListing.getCityId())
+                .orElseThrow(() -> new CityNotFoundException("City not found")));
+        existingListing.setMake(makeRepository.findById(updatedListing.getMakeId())
+                .orElseThrow(() -> new MakeNotFoundException("Make not found")));
+        existingListing.setModel(modelRepository.findById(updatedListing.getModelId())
+                .orElseThrow(() -> new ModelNotFoundException("Model not found")));
+
+        // Save and return the updated listing
+        return Optional.of(listingRepository.save(existingListing));
     }
 
     public boolean deleteListing(Long id) {
@@ -137,5 +149,11 @@ public class ListingService {
             return true;
         }
         return false;
+    }
+    
+    public boolean isListingOwner(Long listingId, String username) {
+        return listingRepository.findById(listingId)
+            .map(listing -> listing.getUser().getUsername().equals(username))
+            .orElse(false);
     }
 }
