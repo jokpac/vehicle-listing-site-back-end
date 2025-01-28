@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lt.ca.javau11.models.ListingDTO;
 import lt.ca.javau11.entities.Listing;
+import lt.ca.javau11.enums.ListingStatus;
 import lt.ca.javau11.services.ListingService;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -47,6 +48,12 @@ public class ListingController {
         return ResponseEntity.of(box);
     }
     
+    @GetMapping("/user/{id}")
+    public List<Listing> getUserListings(@PathVariable Long id) {
+    	return listingService.getUserListings(id);
+
+    }
+    
     @PreAuthorize("hasAuthority('USER')")
     @PostMapping
     public ResponseEntity<Listing> createListing(@RequestBody ListingDTO listingRequest) {
@@ -70,6 +77,13 @@ public class ListingController {
     	
         Optional<Listing> box = listingService.updateListing(id, updatedListing);
         return ResponseEntity.of(box);
+    }
+    
+    @PreAuthorize("@listingService.isListingOwner(#id, authentication.name)")
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Listing> updateListingStatus(@PathVariable Long id, @RequestBody ListingStatus status) {
+        Optional<Listing> updatedListing = listingService.updateListingStatus(id, status);
+        return updatedListing.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MODERATOR') or @listingService.isListingOwner(#id, authentication.name)")

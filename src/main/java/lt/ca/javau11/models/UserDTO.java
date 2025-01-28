@@ -16,16 +16,16 @@ import lt.ca.javau11.entities.Role;
 public class UserDTO implements UserDetails {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private Long id;
 	private String username;
 	private String email;
-	
+
 	private Set<Role> roles;
-	
+
 	@JsonIgnore
 	private String password;
-	
+
 	public UserDTO() {}
 
 	public UserDTO(Long id, String username, String email) {
@@ -33,14 +33,14 @@ public class UserDTO implements UserDetails {
 		this.username = username;
 		this.email = email;
 	}
-	
+
 	public UserDTO(Long id, String username, String email, String password, Set<Role> roles) {
 		this.id = id;
 		this.username = username;
 		this.email = email;
 		this.password = password;
 		this.roles = roles;
-	}	
+	}
 
 	public UserDTO(String username, String email, String password) {
 		this.username = username;
@@ -82,14 +82,11 @@ public class UserDTO implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		
-		 return roles.stream()
-	                .map(role -> new SimpleGrantedAuthority(role.getName()))
-	                .collect(Collectors.toSet());
+		return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toSet());
 	}
 
 	@Override
-	public boolean isAccountNonExpired() {		
+	public boolean isAccountNonExpired() {
 		return true;
 	}
 
@@ -108,19 +105,19 @@ public class UserDTO implements UserDetails {
 		return true;
 	}
 
-	  @Override
-	  public boolean equals(Object o) {
-	    if (this == o)
-	      return true;
-	    if (o == null || getClass() != o.getClass())
-	      return false;
-	    UserDTO user = (UserDTO) o;
-	    return Objects.equals(id, user.id);
-	  }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		UserDTO user = (UserDTO) o;
+		return Objects.equals(id, user.id);
+	}
 
 	@Override
 	public String toString() {
-		return "UserDto [id=" + id + ", username=" + username + ", email=" + email + ", roles=" + roles
-				+ ", password=" + password + "]";
-	}  
+		return "UserDto [id=" + id + ", username=" + username + ", email=" + email + ", roles=" + roles + ", password="
+				+ password + "]";
+	}
 }

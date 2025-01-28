@@ -13,6 +13,7 @@ import lt.ca.javau11.entities.Listing;
 import lt.ca.javau11.entities.Make;
 import lt.ca.javau11.entities.Model;
 import lt.ca.javau11.entities.User;
+import lt.ca.javau11.enums.ListingStatus;
 import lt.ca.javau11.exceptions.CityNotFoundException;
 import lt.ca.javau11.exceptions.CountryNotFoundException;
 import lt.ca.javau11.exceptions.MakeNotFoundException;
@@ -61,6 +62,10 @@ public class ListingService {
         return listingRepository.findById(id);
     }
 
+	public List<Listing> getUserListings(Long id) {
+		return listingRepository.findListingsByUserId(id);
+	}
+	
     public Listing createListing(ListingDTO request) {
     	
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -138,7 +143,24 @@ public class ListingService {
         existingListing.setModel(modelRepository.findById(updatedListing.getModelId())
                 .orElseThrow(() -> new ModelNotFoundException("Model not found")));
 
-        // Save and return the updated listing
+        return Optional.of(listingRepository.save(existingListing));
+    }
+    
+    public Optional<Listing> updateListingStatus(Long id, ListingStatus status) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Optional<Listing> existingListingOpt = listingRepository.findById(id);
+        if (existingListingOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Listing existingListing = existingListingOpt.get();
+
+        if (!existingListing.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("You are not authorized to update this listing");
+        }
+
+        existingListing.setListingStatus(status);
         return Optional.of(listingRepository.save(existingListing));
     }
 
@@ -156,4 +178,5 @@ public class ListingService {
             .map(listing -> listing.getUser().getUsername().equals(username))
             .orElse(false);
     }
+
 }
