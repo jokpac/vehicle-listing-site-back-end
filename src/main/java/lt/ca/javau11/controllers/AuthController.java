@@ -30,9 +30,13 @@ public class AuthController {
 	}
 	
 	@PostMapping("/signin")
-	public ResponseEntity<?> authenticateUser (@RequestBody LoginRequest loginRequest){
-        JwtResponse jwtResponse = authService.authenticateUser(loginRequest);
-        return ResponseEntity.ok(jwtResponse);		
+	public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+	    try {
+	        JwtResponse jwtResponse = authService.authenticateUser(loginRequest);
+	        return ResponseEntity.ok(jwtResponse);
+	    } catch (ResponseStatusException e) {
+	        return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+	    }
 	}
 	
 	@PostMapping("/signup")

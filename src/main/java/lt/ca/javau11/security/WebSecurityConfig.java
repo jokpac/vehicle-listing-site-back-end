@@ -23,54 +23,52 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
-	 @Autowired
-	 UserDetailsService userDetailsService;
-	
-	 @Autowired
-	 AuthenticationEntryPoint unauthorizedHandler;
-	 
-	 @Bean
-	 AuthTokenFilter authenticationJwtTokenFilter() {
-	    return new AuthTokenFilter();
-	 }
-	 
-	 @Bean
-	 DaoAuthenticationProvider authenticationProvider() {
-	      DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-	       
-	      authProvider.setUserDetailsService(userDetailsService);
-	      authProvider.setPasswordEncoder(passwordEncoder());
-	   
-	      return authProvider;
-	  }
-	 
-	 @Bean
-	 AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-	    return authConfig.getAuthenticationManager();
-	  }
-	 
-	 @Bean
-	 PasswordEncoder passwordEncoder() {
-	    return new BCryptPasswordEncoder();
-	  }
-	 
-	 @Bean
-	 SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-	     http.csrf(csrf -> csrf.disable())
-	         .authorizeHttpRequests(auth -> 
-	             auth.requestMatchers("/api/auth/**").permitAll()
-	             	 .requestMatchers("/api/listings/**").permitAll()
-	                 .requestMatchers("/api/users/**").hasAuthority("ADMIN")
-	                 .requestMatchers("/api/test/**").authenticated()
-	                 .anyRequest().permitAll()
-	         )
-	         .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-	         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    @Autowired
+    UserDetailsService userDetailsService;
 
-	     http.authenticationProvider(authenticationProvider());
-	     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+    @Autowired
+    AuthenticationEntryPoint unauthorizedHandler;
 
-	     return http.build();
-	 }
-	 
+    @Bean
+    AuthTokenFilter authenticationJwtTokenFilter() {
+        return new AuthTokenFilter();
+    }
+
+    @Bean
+    DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+
+        return authProvider;
+    }
+
+    @Bean
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/listings/**").permitAll()
+                        .requestMatchers("/api/users/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/test/**").authenticated()
+                        .anyRequest().permitAll())
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        http.authenticationProvider(authenticationProvider());
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
 }

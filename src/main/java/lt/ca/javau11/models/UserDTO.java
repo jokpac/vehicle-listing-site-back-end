@@ -17,6 +17,14 @@ public class UserDTO implements UserDetails {
 
 	private static final long serialVersionUID = 1L;
 
+	public Set<Role> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(Set<Role> roles) {
+		this.roles = roles;
+	}
+
 	private Long id;
 	private String username;
 	private String email;

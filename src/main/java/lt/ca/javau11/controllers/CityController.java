@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lt.ca.javau11.entities.City;
+import lt.ca.javau11.exceptions.CountryNotFoundException;
 import lt.ca.javau11.services.CityService;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -39,6 +40,8 @@ public class CityController {
         try {
             City createdCity = cityService.addCity(countryId, city);
             return ResponseEntity.status(201).body(createdCity);
+        } catch (CountryNotFoundException e) {
+            return ResponseEntity.status(404).body(null); // Return 404 if the country is not found
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }

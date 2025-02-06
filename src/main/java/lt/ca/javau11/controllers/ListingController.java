@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lt.ca.javau11.models.ListingDTO;
 import lt.ca.javau11.entities.Listing;
 import lt.ca.javau11.enums.ListingStatus;
@@ -69,12 +70,10 @@ public class ListingController {
         }
     }
 
-    @PreAuthorize("hasAuthority('USER') and @listingService.isListingOwner(#id, authentication.name)")
+    @PreAuthorize("@listingService.isListingOwner(#id, authentication.name)")
     @PutMapping("/{id}")
-    public ResponseEntity<Listing> updateListing(@PathVariable Long id,
-                                                 @RequestBody ListingDTO updatedListing
-                                                 ) {
-    	
+    public ResponseEntity<Listing> updateListing(@PathVariable Long id, @Valid @RequestBody ListingDTO updatedListing) {
+ 
         Optional<Listing> box = listingService.updateListing(id, updatedListing);
         return ResponseEntity.of(box);
     }
