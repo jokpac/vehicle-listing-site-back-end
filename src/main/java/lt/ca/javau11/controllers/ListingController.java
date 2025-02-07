@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lt.ca.javau11.models.ListingDTO;
 import lt.ca.javau11.entities.Listing;
@@ -39,24 +40,28 @@ public class ListingController {
     }
 
     @GetMapping
+    @Operation(summary = "Returns all listings")
     public List<Listing> getAllListings() {
         return listingService.getAllListings();
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Returns a listing by id")
     public ResponseEntity<Listing> getListingById(@PathVariable Long id) {
         Optional<Listing> box = listingService.getListingById(id);
         return ResponseEntity.of(box);
     }
     
-    @GetMapping("/user/{id}")
-    public List<Listing> getUserListings(@PathVariable Long id) {
-    	return listingService.getUserListings(id);
+    @GetMapping("/user/{userId}")
+    @Operation(summary = "Returns listings of a user by id")
+    public List<Listing> getUserListings(@PathVariable Long userId) {
+    	return listingService.getUserListings(userId);
 
     }
     
     @PreAuthorize("hasAuthority('USER')")
     @PostMapping
+    @Operation(summary = "Creates a new listing")
     public ResponseEntity<Listing> createListing(@RequestBody ListingDTO listingRequest) {
         logger.info("Received request to create a listing with data: {}", listingRequest);
 
@@ -72,6 +77,7 @@ public class ListingController {
 
     @PreAuthorize("@listingService.isListingOwner(#id, authentication.name)")
     @PutMapping("/{id}")
+    @Operation(summary = "Updates a listing by id")
     public ResponseEntity<Listing> updateListing(@PathVariable Long id, @Valid @RequestBody ListingDTO updatedListing) {
  
         Optional<Listing> box = listingService.updateListing(id, updatedListing);
@@ -80,6 +86,7 @@ public class ListingController {
     
     @PreAuthorize("@listingService.isListingOwner(#id, authentication.name)")
     @PutMapping("/{id}/status")
+    @Operation(summary = "Changes listing status (ACTIVE/INACTIVE)")
     public ResponseEntity<Listing> updateListingStatus(@PathVariable Long id, @RequestBody ListingStatus status) {
         Optional<Listing> updatedListing = listingService.updateListingStatus(id, status);
         return updatedListing.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
@@ -87,6 +94,7 @@ public class ListingController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MODERATOR') or @listingService.isListingOwner(#id, authentication.name)")
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deletes a listing by id")
     public ResponseEntity<Void> deleteListing(@PathVariable Long id) {
         boolean isDeleted = listingService.deleteListing(id);
         return isDeleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();

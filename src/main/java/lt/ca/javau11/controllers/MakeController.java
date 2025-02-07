@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lt.ca.javau11.entities.Make;
 import lt.ca.javau11.models.ModelDTO;
 import lt.ca.javau11.services.MakeService;
@@ -30,22 +31,26 @@ public class MakeController {
     }
 
     @GetMapping
+    @Operation(summary = "Returns all makes with models")
     public List<Make> getAll() {
         return makeService.getAll();
     }
 
     @PostMapping
+    @Operation(summary = "Creates a new make")
     public Make addMake(@RequestBody Make make) {
         return makeService.addMake(make);
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Returns a make by id with its models")
     public ResponseEntity<Make> getById(@PathVariable Long id) {
         Optional<Make> box = makeService.getById(id);
         return ResponseEntity.of(box);
     }
     
     @GetMapping("/{id}/models")
+    @Operation(summary = "Returns models by make id")
     public ResponseEntity<List<ModelDTO>> getModelsByMake(@PathVariable Long id) {
         Optional<List<ModelDTO>> models = makeService.getModelsByMake(id);
         return models.map(ResponseEntity::ok)
@@ -53,12 +58,14 @@ public class MakeController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Updates a make by id")
     public ResponseEntity<Make> updateMake(@PathVariable Long id, @RequestBody Make make) {
         Optional<Make> box = makeService.updateMake(id, make);
         return ResponseEntity.of(box);
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deletes a make by id")
     public ResponseEntity<Void> deleteMake(@PathVariable Long id) {
         boolean isDeleted = makeService.deleteMake(id);
         return isDeleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();

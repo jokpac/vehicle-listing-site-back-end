@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lt.ca.javau11.entities.City;
 import lt.ca.javau11.exceptions.CountryNotFoundException;
 import lt.ca.javau11.services.CityService;
@@ -31,11 +32,13 @@ public class CityController {
     }
 
     @GetMapping
+    @Operation(summary = "Returns all cities")
     public List<City> getAll() {
         return cityService.getAll();
     }
 
     @PostMapping("/{countryId}")
+    @Operation(summary = "Creates a new city for a country by id")
     public ResponseEntity<City> addCity(@PathVariable Long countryId, @RequestBody City city) {
         try {
             City createdCity = cityService.addCity(countryId, city);
@@ -48,18 +51,21 @@ public class CityController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Returns a city by id")
     public ResponseEntity<City> getById(@PathVariable Long id) {
         Optional<City> box = cityService.getById(id);
         return ResponseEntity.of(box);
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Updates a city by id")
     public ResponseEntity<City> updateCity(@PathVariable Long id, @RequestBody City city) {
         Optional<City> box = cityService.updateCity(id, city);
         return ResponseEntity.of(box);
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deletes a city by id")
     public ResponseEntity<Void> deleteCity(@PathVariable Long id) {
         boolean isDeleted = cityService.deleteCity(id);
         return isDeleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();

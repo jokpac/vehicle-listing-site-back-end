@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lt.ca.javau11.entities.Country;
 import lt.ca.javau11.models.CityDTO;
 import lt.ca.javau11.services.CountryService;
@@ -30,22 +31,26 @@ public class CountryController {
     }
 
     @GetMapping
+    @Operation(summary = "Returns all coutries with cities")
     public List<Country> getAll() {
         return countryService.getAll();
     }
 
     @PostMapping
+    @Operation(summary = "Creates a new country")
     public Country addCountry(@RequestBody Country country) {
         return countryService.addCountry(country);
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Returns a country by id with its cities")
     public ResponseEntity<Country> getById(@PathVariable Long id) {
         Optional<Country> box = countryService.getById(id);
         return ResponseEntity.of(box);
     }
     
     @GetMapping("/{id}/cities")
+    @Operation(summary = "Returns cities by country id")
     public ResponseEntity<List<CityDTO>> getCitiesByCountry(@PathVariable Long id) {
         Optional<List<CityDTO>> cities = countryService.getCitiesByCountry(id);
         return cities.map(ResponseEntity::ok)
@@ -53,12 +58,14 @@ public class CountryController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Updates a country by id")
     public ResponseEntity<Country> updateCountry(@PathVariable Long id, @RequestBody Country country) {
         Optional<Country> box = countryService.updateCountry(id, country);
         return ResponseEntity.of(box);
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deletes a country by id")
     public ResponseEntity<Void> deleteCountry(@PathVariable Long id) {
         boolean isDeleted = countryService.deleteCountry(id);
         return isDeleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
