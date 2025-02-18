@@ -1,6 +1,7 @@
 package lt.ca.javau11.models;
 
 public class ModelDTO {
+	
     private Long id;
     private String name;
 

@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -49,7 +50,7 @@ public class AuthControllerTest {
         loginRequest.setUsername("username");
         loginRequest.setPassword("password");
         
-        JwtResponse jwtResponse = new JwtResponse("token", 1L, "username", "email", List.of("ROLE_USER"));
+        JwtResponse jwtResponse = new JwtResponse("token", 1L, "username", "email", List.of("USER"));
 
         when(authService.authenticateUser(any(LoginRequest.class))).thenReturn(jwtResponse);
 
@@ -82,7 +83,7 @@ public class AuthControllerTest {
         signUpRequest.setUsername("username");
         signUpRequest.setPassword("password");
         signUpRequest.setEmail("email");
-        signUpRequest.setRole(null);
+        signUpRequest.setRole(Set.of("USER"));
 
         MessageResponse messageResponse = new MessageResponse("User registered successfully!");
 
@@ -101,7 +102,7 @@ public class AuthControllerTest {
         signUpRequest.setUsername("username");
         signUpRequest.setPassword("password");
         signUpRequest.setEmail("email");
-        signUpRequest.setRole(null);
+        signUpRequest.setRole(Set.of("USER"));
 
         when(authService.registerUser(any(SignupRequest.class))).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error: Username is already taken!"));
 

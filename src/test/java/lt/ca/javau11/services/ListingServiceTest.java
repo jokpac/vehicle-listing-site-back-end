@@ -11,7 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,227 +23,215 @@ import lt.ca.javau11.enums.ListingStatus;
 import lt.ca.javau11.exceptions.*;
 import lt.ca.javau11.models.ListingDTO;
 import lt.ca.javau11.repositories.*;
+import lt.ca.javau11.utils.EntityMapper;
+import lt.ca.javau11.utils.ListingSpecification;
 
 @ExtendWith(MockitoExtension.class)
 class ListingServiceTest {
 
-    @Mock
-    private ListingRepository listingRepository;
+    @Mock private ListingRepository listingRepository;
+    @Mock private CountryRepository countryRepository;
+    @Mock private CityRepository cityRepository;
+    @Mock private MakeRepository makeRepository;
+    @Mock private ModelRepository modelRepository;
+    @Mock private UserRepository userRepository;
+    @Mock private EntityMapper entityMapper;
 
-    @Mock
-    private CountryRepository countryRepository;
+    @InjectMocks private ListingService listingService;
 
-    @Mock
-    private CityRepository cityRepository;
-
-    @Mock
-    private MakeRepository makeRepository;
-
-    @Mock
-    private ModelRepository modelRepository;
-
-    @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private Authentication authentication;
-
-    @Mock
-    private SecurityContext securityContext;
-
-    @InjectMocks
-    private ListingService listingService;
-
-    private ListingDTO listingDTO;
     private Listing listing;
+    private ListingDTO listingDTO;
     private User user;
-    private Country country;
-    private City city;
-    private Make make;
-    private Model model;
 
     @BeforeEach
     void setUp() {
-        user = new User("testuser", "password", "test@example.com");
-        user.setId(1L);
-
-        country = new Country();
-        country.setId(1L);
-        country.setName("Lithuania");
-
-        city = new City();
-        city.setId(1L);
-        city.setName("Vilnius");
-
-        make = new Make();
-        make.setId(1L);
-        make.setName("Toyota");
-
-        model = new Model();
-        model.setId(1L);
-        model.setName("Corolla");
-
+        user = new User();
+        user.setUsername("testUser");
+        
         listing = new Listing();
         listing.setId(1L);
         listing.setUser(user);
-        listing.setCountry(country);
-        listing.setCity(city);
-        listing.setMake(make);
-        listing.setModel(model);
-        listing.setTitle("Test Listing");
-
+        
         listingDTO = new ListingDTO();
-        listingDTO.setTitle("Updated Listing");
-        listingDTO.setCountryId(1L);
-        listingDTO.setCityId(1L);
-        listingDTO.setMakeId(1L);
-        listingDTO.setModelId(1L);
-
-        lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
+        listingDTO.setId(1L);
     }
 
-
     @Test
-    void getAllListings_ShouldReturnListOfListings() {
+    void testGetAllListings() {
         when(listingRepository.findAll()).thenReturn(List.of(listing));
-
-        List<Listing> listings = listingService.getAllListings();
-
-        assertNotNull(listings);
-        assertEquals(1, listings.size());
+        when(entityMapper.toListingDto(listing)).thenReturn(listingDTO);
+        
+        List<ListingDTO> result = listingService.getAllListings();
+        
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+        assertEquals(listingDTO, result.get(0));
     }
 
     @Test
-    void getListingById_ShouldReturnListing() {
+    void testGetListingById() {
         when(listingRepository.findById(1L)).thenReturn(Optional.of(listing));
-
-        Optional<Listing> result = listingService.getListingById(1L);
-
+        when(entityMapper.toListingDto(listing)).thenReturn(listingDTO);
+        
+        Optional<ListingDTO> result = listingService.getListingById(1L);
+        
         assertTrue(result.isPresent());
-        assertEquals(listing.getId(), result.get().getId());
+        assertEquals(listingDTO, result.get());
     }
-
+    
     @Test
-    void getUserListings_ShouldReturnUserListings() {
+    void testGetUserListings() {
         when(listingRepository.findListingsByUserId(1L)).thenReturn(List.of(listing));
-
-        List<Listing> listings = listingService.getUserListings(1L);
-
-        assertEquals(1, listings.size());
-        assertEquals("Test Listing", listings.get(0).getTitle());
+        when(entityMapper.toListingDto(listing)).thenReturn(listingDTO);
+        
+        List<ListingDTO> result = listingService.getUserListings(1L);
+        
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+        assertEquals(listingDTO, result.get(0));
     }
 
     @Test
-    void createListing_ShouldReturnCreatedListing() {
-        when(authentication.getName()).thenReturn("testuser");
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
-        when(countryRepository.findById(1L)).thenReturn(Optional.of(country));
-        when(cityRepository.findById(1L)).thenReturn(Optional.of(city));
-        when(makeRepository.findById(1L)).thenReturn(Optional.of(make));
-        when(modelRepository.findById(1L)).thenReturn(Optional.of(model));
-        when(listingRepository.save(any(Listing.class))).thenReturn(listing);
-
-        Listing createdListing = listingService.createListing(listingDTO);
-
-        assertNotNull(createdListing);
-        assertEquals("Test Listing", createdListing.getTitle());
+    void testCreateListing_Success() {
+        mockSecurityContext("testUser");
+        
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(user));
+        when(entityMapper.toListing(any(), any(), any(), any(), any(), any())).thenReturn(listing);
+        when(countryRepository.findById(any())).thenReturn(Optional.of(new Country()));
+        when(cityRepository.findById(any())).thenReturn(Optional.of(new City()));
+        when(makeRepository.findById(any())).thenReturn(Optional.of(new Make()));
+        when(modelRepository.findById(any())).thenReturn(Optional.of(new Model()));
+        when(listingRepository.save(any())).thenReturn(listing);
+        when(entityMapper.toListingDto(listing)).thenReturn(listingDTO);
+        
+        ListingDTO result = listingService.createListing(listingDTO);
+        
+        assertNotNull(result);
+        assertEquals(listingDTO, result);
     }
 
     @Test
-    void createListing_ShouldThrowException_WhenCountryNotFound() {
-        when(countryRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(CountryNotFoundException.class, () -> listingService.createListing(listingDTO));
+    void testCreateListing_UserNotFound() {
+        mockSecurityContext("testUser");
+        
+        when(countryRepository.findById(any())).thenReturn(Optional.of(new Country()));
+        when(cityRepository.findById(any())).thenReturn(Optional.of(new City()));
+        when(makeRepository.findById(any())).thenReturn(Optional.of(new Make()));
+        when(modelRepository.findById(any())).thenReturn(Optional.of(new Model()));
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.empty());
+        
+        assertThrows(UserNotFoundException.class, () -> listingService.createListing(listingDTO));
     }
 
     @Test
-    void updateListing_ShouldReturnUpdatedListing() {
-        when(authentication.getName()).thenReturn("testuser");
+    void testUpdateListing_Success() {
+        mockSecurityContext("testUser");
+        
         when(listingRepository.findById(1L)).thenReturn(Optional.of(listing));
-        when(countryRepository.findById(1L)).thenReturn(Optional.of(country));
-        when(cityRepository.findById(1L)).thenReturn(Optional.of(city));
-        when(makeRepository.findById(1L)).thenReturn(Optional.of(make));
-        when(modelRepository.findById(1L)).thenReturn(Optional.of(model));
-        when(listingRepository.save(any(Listing.class))).thenReturn(listing);
-
-        Optional<Listing> updatedListing = listingService.updateListing(1L, listingDTO);
-
-        assertTrue(updatedListing.isPresent());
-        assertEquals("Updated Listing", updatedListing.get().getTitle());
+        when(listingRepository.save(any())).thenReturn(listing);
+        when(entityMapper.toListingDto(listing)).thenReturn(listingDTO);
+        
+        Optional<ListingDTO> result = listingService.updateListing(1L, listingDTO);
+        
+        assertTrue(result.isPresent());
+        assertEquals(listingDTO, result.get());
     }
 
     @Test
-    void updateListing_ShouldThrowException_WhenNotOwner() {
-        when(authentication.getName()).thenReturn("otheruser");
+    void testUpdateListing_Unauthorized() {
+        mockSecurityContext("anotherUser");
+        
         when(listingRepository.findById(1L)).thenReturn(Optional.of(listing));
-
+        
         assertThrows(RuntimeException.class, () -> listingService.updateListing(1L, listingDTO));
     }
 
     @Test
-    void updateListingStatus_ShouldReturnUpdatedListing() {
-        when(authentication.getName()).thenReturn("testuser");
+    void testDeleteListing_Success() {
         when(listingRepository.findById(1L)).thenReturn(Optional.of(listing));
-        when(listingRepository.save(any(Listing.class))).thenReturn(listing);
-
-        Optional<Listing> updatedListing = listingService.updateListingStatus(1L, ListingStatus.ACTIVE);
-
-        assertTrue(updatedListing.isPresent());
-        assertEquals(ListingStatus.ACTIVE, updatedListing.get().getListingStatus());
+        doNothing().when(listingRepository).delete(listing);
+        
+        assertTrue(listingService.deleteListing(1L));
     }
 
     @Test
-    void updateListingStatus_ShouldThrowException_WhenNotOwner() {
-        when(authentication.getName()).thenReturn("otheruser");
+    void testDeleteListing_NotFound() {
+        when(listingRepository.findById(1L)).thenReturn(Optional.empty());
+        
+        assertFalse(listingService.deleteListing(1L));
+    }
+    
+    @Test
+    void testUpdateListingStatus_Success() {
+        mockSecurityContext("testUser");
         when(listingRepository.findById(1L)).thenReturn(Optional.of(listing));
+        when(listingRepository.save(any())).thenReturn(listing);
+        when(entityMapper.toListingDto(listing)).thenReturn(listingDTO);
 
+        Optional<ListingDTO> result = listingService.updateListingStatus(1L, ListingStatus.ACTIVE);
+        
+        assertTrue(result.isPresent());
+        assertEquals(listingDTO, result.get());
+    }
+
+    @Test
+    void testUpdateListingStatus_Unauthorized() {
+        mockSecurityContext("anotherUser");
+        when(listingRepository.findById(1L)).thenReturn(Optional.of(listing));
+        
         assertThrows(RuntimeException.class, () -> listingService.updateListingStatus(1L, ListingStatus.ACTIVE));
     }
 
     @Test
-    void deleteListing_ShouldReturnTrue_WhenListingExists() {
+    void testIsListingOwner_True() {
         when(listingRepository.findById(1L)).thenReturn(Optional.of(listing));
-
-        boolean result = listingService.deleteListing(1L);
-
-        assertTrue(result);
-        verify(listingRepository, times(1)).delete(listing);
+        
+        assertTrue(listingService.isListingOwner(1L, "testUser"));
     }
 
     @Test
-    void deleteListing_ShouldReturnFalse_WhenListingNotFound() {
+    void testIsListingOwner_False() {
+        when(listingRepository.findById(1L)).thenReturn(Optional.of(listing));
+        
+        assertFalse(listingService.isListingOwner(1L, "anotherUser"));
+    }
+
+    @Test
+    void testIsListingOwner_NotFound() {
         when(listingRepository.findById(1L)).thenReturn(Optional.empty());
-
-        boolean result = listingService.deleteListing(1L);
-
-        assertFalse(result);
+        
+        assertFalse(listingService.isListingOwner(1L, "testUser"));
     }
 
-    @Test
-    void isListingOwner_ShouldReturnTrue_WhenUserIsOwner() {
-        when(listingRepository.findById(1L)).thenReturn(Optional.of(listing));
+    @SuppressWarnings("unchecked")
+	@Test
+    void testGetFilteredListings() {
+        Specification<Listing> spec = mock(Specification.class);
+        try (MockedStatic<ListingSpecification> mockedSpec = mockStatic(ListingSpecification.class)) {
+            mockedSpec.when(() -> ListingSpecification.filterListings(
+                    any(), any(), any(), any(), any(), any(), any(), any(),
+                    any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(spec);
+            when(listingRepository.findAll(any(Specification.class))).thenReturn(List.of(listing));
+            when(entityMapper.toListingDto(listing)).thenReturn(listingDTO);
 
-        boolean result = listingService.isListingOwner(1L, "testuser");
+            List<ListingDTO> result = listingService.getFilteredListings(
+                    null, null, null, null, null, null, null, null, null, null, 
+                    null, null, null, null, null, null, null);
 
-        assertTrue(result);
+            assertFalse(result.isEmpty());
+            assertEquals(1, result.size());
+            assertEquals(listingDTO, result.get(0));
+        }
     }
 
-    @Test
-    void isListingOwner_ShouldReturnFalse_WhenUserIsNotOwner() {
-        when(listingRepository.findById(1L)).thenReturn(Optional.of(listing));
+    private void mockSecurityContext(String username) {
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getName()).thenReturn(username);
 
-        boolean result = listingService.isListingOwner(1L, "otheruser");
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
 
-        assertFalse(result);
-    }
-
-    @Test
-    void isListingOwner_ShouldReturnFalse_WhenListingNotFound() {
-        when(listingRepository.findById(1L)).thenReturn(Optional.empty());
-
-        boolean result = listingService.isListingOwner(1L, "testuser");
-
-        assertFalse(result);
+        SecurityContextHolder.setContext(securityContext);
     }
 }

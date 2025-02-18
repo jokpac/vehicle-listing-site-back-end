@@ -34,7 +34,6 @@ public class CountryServiceTest {
         country.setId(countryId);
         country.setName("Test Country");
 
-        // Create some cities for testing getCitiesByCountry
         City city1 = new City();
         city1.setId(1L);
         city1.setName("City 1");

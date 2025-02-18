@@ -12,11 +12,20 @@ import lt.ca.javau11.enums.Transmission;
 
 public class ListingDTO {
 
+	private Long id;
+	
     private Long countryId;
     private Long cityId;
     private Long makeId;
     private Long modelId;
+    
+    private String countryName;
+    private String cityName;
+    private String makeName;
+    private String modelName;
+    
     private Long userId;
+    
     private String title;
     private Double price;
     private int year;
@@ -34,14 +43,20 @@ public class ListingDTO {
     
     public ListingDTO() {}
 
-	public ListingDTO(Long countryId, Long cityId, Long makeId, Long modelId, Long userId, String title, Double price,
-			int year, int month, int mileage, String description, double engineSize, int enginePower, FuelType fuelType,
+	public ListingDTO(Long id, Long countryId, Long cityId, Long makeId, Long modelId, String countryName,
+			String cityName, String makeName, String modelName, Long userId, String title, Double price, int year,
+			int month, int mileage, String description, double engineSize, int enginePower, FuelType fuelType,
 			Transmission transmission, DrivenWheels drivenWheels, ListingType listingType, ListingStatus listingStatus,
 			List<String> imageURLs) {
+		this.id = id;
 		this.countryId = countryId;
 		this.cityId = cityId;
 		this.makeId = makeId;
 		this.modelId = modelId;
+		this.countryName = countryName;
+		this.cityName = cityName;
+		this.makeName = makeName;
+		this.modelName = modelName;
 		this.userId = userId;
 		this.title = title;
 		this.price = price;
@@ -59,12 +74,12 @@ public class ListingDTO {
 		this.imageURLs = imageURLs;
 	}
 
-	public ListingStatus getListingStatus() {
-		return listingStatus;
+	public Long getId() {
+		return id;
 	}
 
-	public void setListingStatus(ListingStatus listingStatus) {
-		this.listingStatus = listingStatus;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public Long getCountryId() {
@@ -97,6 +112,38 @@ public class ListingDTO {
 
 	public void setModelId(Long modelId) {
 		this.modelId = modelId;
+	}
+
+	public String getCountryName() {
+		return countryName;
+	}
+
+	public void setCountryName(String countryName) {
+		this.countryName = countryName;
+	}
+
+	public String getCityName() {
+		return cityName;
+	}
+
+	public void setCityName(String cityName) {
+		this.cityName = cityName;
+	}
+
+	public String getMakeName() {
+		return makeName;
+	}
+
+	public void setMakeName(String makeName) {
+		this.makeName = makeName;
+	}
+
+	public String getModelName() {
+		return modelName;
+	}
+
+	public void setModelName(String modelName) {
+		this.modelName = modelName;
 	}
 
 	public Long getUserId() {
@@ -203,6 +250,14 @@ public class ListingDTO {
 		this.listingType = listingType;
 	}
 
+	public ListingStatus getListingStatus() {
+		return listingStatus;
+	}
+
+	public void setListingStatus(ListingStatus listingStatus) {
+		this.listingStatus = listingStatus;
+	}
+
 	public List<String> getImageURLs() {
 		return imageURLs;
 	}
@@ -211,5 +266,4 @@ public class ListingDTO {
 		this.imageURLs = imageURLs;
 	}
 
-    
 }
