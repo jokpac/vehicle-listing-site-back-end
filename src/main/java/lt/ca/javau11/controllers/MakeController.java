@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +37,7 @@ public class MakeController {
         return makeService.getAll();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     @Operation(summary = "Creates a new make")
     public Make addMake(@RequestBody Make make) {
@@ -57,6 +59,7 @@ public class MakeController {
                      .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     @Operation(summary = "Updates a make by id")
     public ResponseEntity<Make> updateMake(@PathVariable Long id, @RequestBody Make make) {
@@ -64,6 +67,7 @@ public class MakeController {
         return ResponseEntity.of(box);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(summary = "Deletes a make by id")
     public ResponseEntity<Void> deleteMake(@PathVariable Long id) {

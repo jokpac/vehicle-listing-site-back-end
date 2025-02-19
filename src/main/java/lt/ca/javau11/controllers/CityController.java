@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +38,7 @@ public class CityController {
         return cityService.getAll();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/{countryId}")
     @Operation(summary = "Creates a new city for a country by id")
     public ResponseEntity<City> addCity(@PathVariable Long countryId, @RequestBody City city) {
@@ -57,6 +59,7 @@ public class CityController {
         return ResponseEntity.of(box);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     @Operation(summary = "Updates a city by id")
     public ResponseEntity<City> updateCity(@PathVariable Long id, @RequestBody City city) {
@@ -64,6 +67,7 @@ public class CityController {
         return ResponseEntity.of(box);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(summary = "Deletes a city by id")
     public ResponseEntity<Void> deleteCity(@PathVariable Long id) {

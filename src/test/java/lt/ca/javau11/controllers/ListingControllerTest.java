@@ -1,30 +1,23 @@
 package lt.ca.javau11.controllers;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.util.Collections;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lt.ca.javau11.enums.ListingStatus;
 import lt.ca.javau11.models.ListingDTO;
 import lt.ca.javau11.services.ListingService;
+import lt.ca.javau11.enums.ListingStatus;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-@ExtendWith(MockitoExtension.class)
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 class ListingControllerTest {
 
     @Mock
@@ -33,182 +26,186 @@ class ListingControllerTest {
     @InjectMocks
     private ListingController listingController;
 
-    private MockMvc mockMvc;
-    private ObjectMapper objectMapper;
-
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(listingController).build();
-        objectMapper = new ObjectMapper();
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testGetAllListings() throws Exception {
-        ListingDTO listingDTO = new ListingDTO();
-        listingDTO.setId(1L);
+    void getAllListings_ShouldReturnAllListings() {
+        ListingDTO listing1 = new ListingDTO();
+        ListingDTO listing2 = new ListingDTO();
+        when(listingService.getAllListings()).thenReturn(Arrays.asList(listing1, listing2));
 
-        when(listingService.getAllListings()).thenReturn(Collections.singletonList(listingDTO));
+        List<ListingDTO> result = listingController.getAllListings();
 
-        mockMvc.perform(get("/api/listings")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L));
-
+        assertEquals(2, result.size());
         verify(listingService, times(1)).getAllListings();
     }
 
     @Test
-    void testGetListingById() throws Exception {
-        ListingDTO listingDTO = new ListingDTO();
-        listingDTO.setId(1L);
+    void getListingById_ShouldReturnListing_WhenListingExists() {
+        Long id = 1L;
+        ListingDTO listing = new ListingDTO();
+        listing.setId(id);
+        when(listingService.getListingById(id)).thenReturn(Optional.of(listing));
 
-        when(listingService.getListingById(1L)).thenReturn(Optional.of(listingDTO));
+        ResponseEntity<ListingDTO> response = listingController.getListingById(id);
 
-        mockMvc.perform(get("/api/listings/1")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L));
-
-        verify(listingService, times(1)).getListingById(1L);
-    }
-
-    @Test
-    void testGetListingById_NotFound() throws Exception {
-        when(listingService.getListingById(1L)).thenReturn(Optional.empty());
-
-        mockMvc.perform(get("/api/listings/1")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-
-        verify(listingService, times(1)).getListingById(1L);
-    }
-
-    @Test
-    void testGetUserListings() throws Exception {
-        ListingDTO listingDTO = new ListingDTO();
-        listingDTO.setId(1L);
-
-        when(listingService.getUserListings(1L)).thenReturn(Collections.singletonList(listingDTO));
-
-        mockMvc.perform(get("/api/listings/user/1")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L));
-
-        verify(listingService, times(1)).getUserListings(1L);
-    }
-
-    @Test
-    void testCreateListing() throws Exception {
-        ListingDTO listingDTO = new ListingDTO();
-        listingDTO.setId(1L);
-
-        when(listingService.createListing(any(ListingDTO.class))).thenReturn(listingDTO);
-
-        mockMvc.perform(post("/api/listings")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(listingDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L));
-
-        verify(listingService, times(1)).createListing(any(ListingDTO.class));
-    }
-
-    @Test
-    void testUpdateListing() throws Exception {
-        ListingDTO listingDTO = new ListingDTO();
-        listingDTO.setId(1L);
-
-        when(listingService.updateListing(eq(1L), any(ListingDTO.class))).thenReturn(Optional.of(listingDTO));
-
-        mockMvc.perform(put("/api/listings/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(listingDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L));
-
-        verify(listingService, times(1)).updateListing(eq(1L), any(ListingDTO.class));
-    }
-
-    @Test
-    void testUpdateListing_NotFound() throws Exception {
-        ListingDTO listingDTO = new ListingDTO();
-        listingDTO.setId(1L);
-
-        when(listingService.updateListing(eq(1L), any(ListingDTO.class))).thenReturn(Optional.empty());
-
-        mockMvc.perform(put("/api/listings/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(listingDTO)))
-                .andExpect(status().isNotFound());
-
-        verify(listingService, times(1)).updateListing(eq(1L), any(ListingDTO.class));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        
+        ListingDTO body = response.getBody();
+        assertNotNull(body);
+        assertEquals(id, body.getId());
+        verify(listingService, times(1)).getListingById(id);
     }
 
 
     @Test
-    void testUpdateListingStatus() throws Exception {
-        ListingDTO listingDTO = new ListingDTO();
-        listingDTO.setId(1L);
+    void getListingById_ShouldReturnNotFound_WhenListingDoesNotExist() {
+        Long id = 1L;
+        when(listingService.getListingById(id)).thenReturn(Optional.empty());
 
-        when(listingService.updateListingStatus(1L, ListingStatus.ACTIVE)).thenReturn(Optional.of(listingDTO));
+        ResponseEntity<ListingDTO> response = listingController.getListingById(id);
 
-        mockMvc.perform(put("/api/listings/1/status")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("\"ACTIVE\""))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L));
-
-        verify(listingService, times(1)).updateListingStatus(1L, ListingStatus.ACTIVE);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(listingService, times(1)).getListingById(id);
     }
 
     @Test
-    void testUpdateListingStatus_NotFound() throws Exception {
-        when(listingService.updateListingStatus(1L, ListingStatus.ACTIVE)).thenReturn(Optional.empty());
+    void getUserListings_ShouldReturnListingsForUser() {
+        Long userId = 1L;
+        ListingDTO listing1 = new ListingDTO();
+        ListingDTO listing2 = new ListingDTO();
+        when(listingService.getUserListings(userId)).thenReturn(Arrays.asList(listing1, listing2));
 
-        mockMvc.perform(put("/api/listings/1/status")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("\"ACTIVE\""))
-                .andExpect(status().isNotFound());
+        List<ListingDTO> result = listingController.getUserListings(userId);
 
-        verify(listingService, times(1)).updateListingStatus(1L, ListingStatus.ACTIVE);
+        assertEquals(2, result.size());
+        verify(listingService, times(1)).getUserListings(userId);
     }
 
     @Test
-    void testDeleteListing() throws Exception {
-        when(listingService.deleteListing(1L)).thenReturn(true);
+    void createListing_ShouldCreateListing_WhenRequestIsValid() {
+        ListingDTO listingRequest = new ListingDTO();
+        listingRequest.setTitle("Test Listing");
+        
+        ListingDTO createdListing = new ListingDTO();
+        createdListing.setId(1L);
+        createdListing.setTitle("Test Listing");
+        
+        when(listingService.createListing(listingRequest)).thenReturn(createdListing);
 
-        mockMvc.perform(delete("/api/listings/1")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        ResponseEntity<ListingDTO> response = listingController.createListing(listingRequest);
 
-        verify(listingService, times(1)).deleteListing(1L);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        ListingDTO body = response.getBody();
+        assertNotNull(body, "Response body should not be null");
+
+        assertEquals(1L, body.getId());
+        assertEquals("Test Listing", body.getTitle());
+
+        verify(listingService, times(1)).createListing(listingRequest);
+    }
+
+
+    @Test
+    void updateListing_ShouldUpdateListing_WhenListingExists() {
+        Long id = 1L;
+        ListingDTO updatedListing = new ListingDTO();
+        updatedListing.setTitle("Updated Listing");
+        
+        when(listingService.updateListing(id, updatedListing)).thenReturn(Optional.of(updatedListing));
+
+        ResponseEntity<ListingDTO> response = listingController.updateListing(id, updatedListing);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        ListingDTO body = response.getBody();
+        assertNotNull(body);
+
+        assertEquals("Updated Listing", body.getTitle());
+
+        verify(listingService, times(1)).updateListing(id, updatedListing);
+    }
+
+
+    @Test
+    void updateListing_ShouldReturnNotFound_WhenListingDoesNotExist() {
+        Long id = 1L;
+        ListingDTO updatedListing = new ListingDTO();
+        when(listingService.updateListing(id, updatedListing)).thenReturn(Optional.empty());
+
+        ResponseEntity<ListingDTO> response = listingController.updateListing(id, updatedListing);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(listingService, times(1)).updateListing(id, updatedListing);
     }
 
     @Test
-    void testDeleteListing_NotFound() throws Exception {
-        when(listingService.deleteListing(1L)).thenReturn(false);
+    void updateListingStatus_ShouldUpdateStatus_WhenListingExists() {
+        Long id = 1L;
+        ListingStatus status = ListingStatus.ACTIVE;
+        ListingDTO updatedListing = new ListingDTO();
+        updatedListing.setListingStatus(status);
+        when(listingService.updateListingStatus(id, status)).thenReturn(Optional.of(updatedListing));
 
-        mockMvc.perform(delete("/api/listings/1")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+        ResponseEntity<ListingDTO> response = listingController.updateListingStatus(id, status);
 
-        verify(listingService, times(1)).deleteListing(1L);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        ListingDTO body = response.getBody();
+        assertNotNull(body);
+        assertEquals(status, body.getListingStatus());
+        verify(listingService, times(1)).updateListingStatus(id, status);
     }
 
     @Test
-    void testGetFilteredListings() throws Exception {
-        ListingDTO listingDTO = new ListingDTO();
-        listingDTO.setId(1L);
+    void updateListingStatus_ShouldReturnNotFound_WhenListingDoesNotExist() {
+        Long id = 1L;
+        ListingStatus status = ListingStatus.ACTIVE;
+        when(listingService.updateListingStatus(id, status)).thenReturn(Optional.empty());
 
-        when(listingService.getFilteredListings(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-                .thenReturn(Collections.singletonList(listingDTO));
+        ResponseEntity<ListingDTO> response = listingController.updateListingStatus(id, status);
 
-        mockMvc.perform(get("/api/listings/filter")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L));
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(listingService, times(1)).updateListingStatus(id, status);
+    }
 
-        verify(listingService, times(1)).getFilteredListings(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+    @Test
+    void deleteListing_ShouldDeleteListing_WhenListingExists() {
+        Long id = 1L;
+        when(listingService.deleteListing(id)).thenReturn(true);
+
+        ResponseEntity<Void> response = listingController.deleteListing(id);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(listingService, times(1)).deleteListing(id);
+    }
+
+    @Test
+    void deleteListing_ShouldReturnNotFound_WhenListingDoesNotExist() {
+        Long id = 1L;
+        when(listingService.deleteListing(id)).thenReturn(false);
+
+        ResponseEntity<Void> response = listingController.deleteListing(id);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(listingService, times(1)).deleteListing(id);
+    }
+
+    @Test
+    void getFilteredListings_ShouldReturnFilteredListings() {
+        Double priceMin = 1000.0;
+        Double priceMax = 5000.0;
+        ListingDTO listing1 = new ListingDTO();
+        ListingDTO listing2 = new ListingDTO();
+        when(listingService.getFilteredListings(priceMin, priceMax, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null))
+                .thenReturn(Arrays.asList(listing1, listing2));
+
+        List<ListingDTO> result = listingController.getFilteredListings(priceMin, priceMax, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+
+        assertEquals(2, result.size());
+        verify(listingService, times(1)).getFilteredListings(priceMin, priceMax, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 }

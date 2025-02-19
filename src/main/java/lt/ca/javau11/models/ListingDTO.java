@@ -1,45 +1,92 @@
 package lt.ca.javau11.models;
 
 
-import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lt.ca.javau11.enums.DrivenWheels;
 import lt.ca.javau11.enums.FuelType;
 import lt.ca.javau11.enums.ListingStatus;
 import lt.ca.javau11.enums.ListingType;
 import lt.ca.javau11.enums.Transmission;
+import lt.ca.javau11.utils.ValidYear;
 
 public class ListingDTO {
 
 	private Long id;
 	
+    @NotNull(message = "Country is required")
     private Long countryId;
+
+    @NotNull(message = "City is required")
     private Long cityId;
+
+    @NotNull(message = "Make is required")
     private Long makeId;
+
+    @NotNull(message = "Model is required")
     private Long modelId;
-    
+
     private String countryName;
     private String cityName;
     private String makeName;
     private String modelName;
-    
+
     private Long userId;
-    
+
+    @NotBlank(message = "Title is required")
+    @Size(min = 3, message = "Title must be at least 3 characters long")
     private String title;
+
+    @NotNull(message = "Price is required")
+    @Positive(message = "Price must be greater than 0")
     private Double price;
-    private int year;
-    private int month;
-    private int mileage;
+
+    @NotNull(message = "Year is required")
+    @ValidYear
+    private Integer year;
+
+    @NotNull(message = "Month is required")
+    @Min(value = 1, message = "Month must be between 1 and 12")
+    @Max(value = 12, message = "Month must be between 1 and 12")
+    private Integer month;
+
+    @NotNull(message = "Mileage is required")
+    @Min(value = 0, message = "Mileage must be greater than or equal to 0")
+    private Integer mileage;
+
+    @NotBlank(message = "Description is required")
+    @Size(min = 10, message = "Description must be at least 10 characters long")
     private String description;
-    private double engineSize;
-    private int enginePower;
+
+    @NotNull(message = "Engine size is required")
+    @Positive(message = "Engine size must be greater than 0")
+    private Double engineSize;
+
+    @NotNull(message = "Engine power is required")
+    @Positive(message = "Engine power must be greater than 0")
+    private Integer enginePower;
+
+    @NotNull(message = "Fuel type is required")
     private FuelType fuelType;
+
+    @NotNull(message = "Transmission type is required")
     private Transmission transmission;
+
+    @NotNull(message = "Driven wheels selection is required")
     private DrivenWheels drivenWheels;
+
+    @NotNull(message = "Listing type is required")
     private ListingType listingType;
+
     private ListingStatus listingStatus;
-    private List<String> imageURLs = new ArrayList<>();
+
+    private List<String> imageURLs;
     
     public ListingDTO() {}
 

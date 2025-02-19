@@ -19,7 +19,11 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import lt.ca.javau11.entities.*;
+import lt.ca.javau11.enums.DrivenWheels;
+import lt.ca.javau11.enums.FuelType;
 import lt.ca.javau11.enums.ListingStatus;
+import lt.ca.javau11.enums.ListingType;
+import lt.ca.javau11.enums.Transmission;
 import lt.ca.javau11.exceptions.*;
 import lt.ca.javau11.models.ListingDTO;
 import lt.ca.javau11.repositories.*;
@@ -54,6 +58,24 @@ class ListingServiceTest {
         
         listingDTO = new ListingDTO();
         listingDTO.setId(1L);
+        listingDTO.setTitle("Title");
+        listingDTO.setYear(2020);
+        listingDTO.setMonth(1);
+        listingDTO.setMakeId(1L);
+        listingDTO.setModelId(1L);
+        listingDTO.setCountryId(1L);
+        listingDTO.setCityId(1L);
+        listingDTO.setDescription("Description");
+        listingDTO.setMileage(200000);
+        listingDTO.setEnginePower(100);
+        listingDTO.setEngineSize(2.0);
+        listingDTO.setPrice(5000.0);
+        listingDTO.setImageURLs(List.of("image/1", "image/2"));
+        listingDTO.setDrivenWheels(DrivenWheels.FWD);
+        listingDTO.setTransmission(Transmission.AUTOMATIC);
+        listingDTO.setFuelType(FuelType.DIESEL);
+        listingDTO.setListingStatus(ListingStatus.ACTIVE);
+        listingDTO.setListingType(ListingType.SALE);
     }
 
     @Test

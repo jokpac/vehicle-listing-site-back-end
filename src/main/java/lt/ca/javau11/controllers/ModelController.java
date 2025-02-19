@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +36,7 @@ public class ModelController {
         return modelService.getAll();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/{makeId}")
     @Operation(summary = "Creates a new model for a make by id")
     public ResponseEntity<Model> addModel(@PathVariable Long makeId, @RequestBody Model model) {
@@ -53,6 +55,7 @@ public class ModelController {
         return ResponseEntity.of(box);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     @Operation(summary = "Updates a model by id")
     public ResponseEntity<Model> updateModel(@PathVariable Long id, @RequestBody Model model) {
@@ -60,6 +63,7 @@ public class ModelController {
         return ResponseEntity.of(box);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(summary = "Deletes a model by id")
     public ResponseEntity<Void> deleteModel(@PathVariable Long id) {

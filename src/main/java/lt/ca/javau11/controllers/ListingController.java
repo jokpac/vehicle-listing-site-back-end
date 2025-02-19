@@ -62,17 +62,11 @@ public class ListingController {
     @PreAuthorize("hasAuthority('USER')")
     @PostMapping
     @Operation(summary = "Creates a new listing")
-    public ResponseEntity<ListingDTO> createListing(@RequestBody ListingDTO listingRequest) {
+    public ResponseEntity<ListingDTO> createListing(@Valid @RequestBody ListingDTO listingRequest) {
         logger.info("Received request to create a listing with data: {}", listingRequest);
-
-        try {
-            ListingDTO createdListing = listingService.createListing(listingRequest);
-            logger.info("Successfully created a listing with ID: {}", createdListing.getId());
-            return ResponseEntity.status(201).body(createdListing);
-        } catch (Exception e) {
-            logger.error("Error occurred while creating a listing: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).build();
-        }
+        ListingDTO createdListing = listingService.createListing(listingRequest);
+        logger.info("Successfully created a listing with ID: {}", createdListing.getId());
+        return ResponseEntity.status(201).body(createdListing);
     }
 
     @PreAuthorize("@listingService.isListingOwner(#id, authentication.name)")
