@@ -35,7 +35,8 @@ public class AuthController {
 	        JwtResponse jwtResponse = authService.authenticateUser(loginRequest);
 	        return ResponseEntity.ok(jwtResponse);
 	    } catch (ResponseStatusException e) {
-	        return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+	        return ResponseEntity.status(e.getStatusCode())
+	                             .body(new MessageResponse(e.getReason()));
 	    }
 	}
 	

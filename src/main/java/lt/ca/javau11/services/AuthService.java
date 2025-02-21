@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -56,23 +57,26 @@ public class AuthService {
 		  this.jwtUtils = jwtUtils;
 	  }
 
-	public JwtResponse authenticateUser(LoginRequest loginRequest) {
-       
-		Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
-        );
-		
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+	  public JwtResponse authenticateUser(LoginRequest loginRequest) {
+		    try {
+		        Authentication authentication = authenticationManager.authenticate(
+		            new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+		        );
 
-        String jwt = jwtUtils.generateJwtToken(authentication);
-        UserDTO userDetails = (UserDTO) authentication.getPrincipal();
-        logger.info("Before: " + userDetails.toString());
-        List<String> roles = userDetails.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.toList());
+		        SecurityContextHolder.getContext().setAuthentication(authentication);
+		        String jwt = jwtUtils.generateJwtToken(authentication);
+		        UserDTO userDetails = (UserDTO) authentication.getPrincipal();
+		        List<String> roles = userDetails.getAuthorities().stream()
+		            .map(GrantedAuthority::getAuthority)
+		            .collect(Collectors.toList());
 
-        return new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles);
-    }
+		        return new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles);
+		    } catch (BadCredentialsException e) {
+		        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect username or password");
+		    } catch (Exception e) {
+		        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred during login");
+		    }
+		}
 	
 	public MessageResponse registerUser(SignupRequest signUpRequest) {
 		
